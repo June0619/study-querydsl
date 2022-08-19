@@ -1,5 +1,7 @@
 package study.querydsl;
 
+import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,8 @@ import study.querydsl.entity.Team;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static study.querydsl.entity.QMember.member;
@@ -88,6 +92,45 @@ public class QuerydslBasicTest {
                 .fetchOne();
 
         assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void resultFetch() {
+
+//        List<Member> fetch = queryFactory
+//                .selectFrom(member)
+//                .fetch();
+
+        //조회 결과가 여러개인데 fetchOne 사용 시 NonUniqueResultException 발생
+//        Member fetchOne = queryFactory
+//                .selectFrom(QMember.member)
+//                .fetchOne();
+//
+//        System.out.println("fetchOne = " + fetchOne);
+//
+
+//        Member fetchFirst = queryFactory
+//                .selectFrom(QMember.member)
+//                .fetchFirst();
+//
+//        System.out.println("fetchFirst = " + fetchFirst);
+
+        //지원이 끊긴 fetchResults 및 fetchCount
+//        QueryResults<Member> memberQueryResults = queryFactory
+//                .selectFrom(QMember.member)
+//                .fetchResults();
+
+//        long l = queryFactory
+//                .selectFrom(member)
+//                .fetchCount();
+
+        //카운트 쿼리 예제
+        Long count = queryFactory
+                .select(Wildcard.count)
+                .from(member)
+                .fetchOne();
+
+        System.out.println("count = " + count);
     }
 
 }
