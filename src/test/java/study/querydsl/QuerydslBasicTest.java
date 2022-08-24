@@ -466,4 +466,42 @@ public class QuerydslBasicTest {
 
         System.out.println("result = " + result);
     }
+
+    @Test
+    public void simpleProjection() {
+
+        //프로젝션 대상이 하나인 경우 간단하게 조회 가능
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    public void tupleProjection() {
+
+        //반환 타입이 두개 이상인 경우 tuple 자료형으로 반환된다.
+        List<Tuple> result = queryFactory
+                .select(member.username, member.age)
+                .from(member)
+                .fetch();
+
+        for (Tuple tuple : result) {
+
+            String username = tuple.get(member.username);
+            Integer age = tuple.get(member.age);
+            Long userId = tuple.get(member.id);
+
+            System.out.println("username = " + username);
+            System.out.println("age = " + age);
+            System.out.println("userId = " + userId);
+        }
+
+        //Tuple 객체를 리포지토리 계층 밖에서 사용하는 것은 좋은 설계가 아니다.
+        //-> Tuple 객체가 QueryDSL 라이브러리에 의존하기 때문
+    }
 }
