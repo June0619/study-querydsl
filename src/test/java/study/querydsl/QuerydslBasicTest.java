@@ -14,6 +14,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
@@ -623,6 +624,67 @@ public class QuerydslBasicTest {
 
         List<Member> result = searchMember2(usernameParam, ageParam);
         assertThat(result.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void bulkUpdate() {
+
+        //member1 = 10 -> 비회원
+        //member2 = 20 -> 비회원
+        //member3 = 30 -> 유지
+        //member4 = 40 -> 유지
+
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        //member1 = 10 -> DB 비회원
+        //member2 = 20 -> DB 비회원
+        //member3 = 30 -> DB member3
+        //member4 = 40 -> DB member4
+
+        for (Member member : result) {
+            //영속성 컨텍스트 내에는 member1 과 member2 의 username 이 업데이트 되지 않은상태
+            System.out.println("member = " + member);
+        }
+
+        System.out.println("==== flush ====");
+
+        em.flush();
+        em.clear();
+
+        List<Member> result2 = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member member : result2) {
+            System.out.println("member = " + member);
+        }
+    }
+
+    @Test
+    public void bulkAdd() {
+        long count = queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+
+        em.flush();
+        em.clear();
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member mem : result) {
+            System.out.println("mem = " + mem);
+        }
     }
 
     private List<Member> searchMember2(String usernameCond, Integer ageCond) {
