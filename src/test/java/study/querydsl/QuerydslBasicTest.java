@@ -739,6 +739,7 @@ public class QuerydslBasicTest {
 
     //광고 상태 isValid, 날짜가 IN: isServiceable
     private BooleanExpression allEq(String usernameCond, Integer ageCond) {
+        //Null 체크 필요
         return usernameEq(usernameCond).and(ageEq(ageCond));
     }
 
