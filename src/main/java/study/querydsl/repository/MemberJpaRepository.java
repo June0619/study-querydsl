@@ -127,10 +127,10 @@ public class MemberJpaRepository {
     }
 
     private BooleanExpression ageGoe(Integer ageGoe) {
-        return null;
+        return ageGoe != null ? member.age.goe(ageGoe) : null;
     }
 
     private BooleanExpression ageLoe(Integer ageLoe) {
-        return null;
+        return ageLoe != null ? member.age.loe(ageLoe) : null;
     }
 }
