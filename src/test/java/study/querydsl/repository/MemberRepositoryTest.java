@@ -15,7 +15,6 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -87,7 +86,7 @@ class MemberRepositoryTest {
         MemberSearchCondition condition = new MemberSearchCondition();
         PageRequest pageRequest = PageRequest.of(0, 3);
 
-        Page<MemberTeamDto> result = memberRepository.searchPageSimple(condition, pageRequest);
+        Page<MemberTeamDto> result = memberRepository.searchPage(condition, pageRequest);
 
         assertThat(result.getSize()).isEqualTo(3);
         assertThat(result.getContent()).extracting("username")

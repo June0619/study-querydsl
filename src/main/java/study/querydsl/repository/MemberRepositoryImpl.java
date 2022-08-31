@@ -47,7 +47,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     }
 
     @Override
-    public Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable) {
+    public Page<MemberTeamDto> searchPage(MemberSearchCondition condition, Pageable pageable) {
 
         List<MemberTeamDto> result = queryFactory
                 .select(new QMemberTeamDto(
@@ -95,11 +95,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 //        return new PageImpl<>(result, pageable, count.orElse(0L));
         //아래와 같이 변경하면 카운트 쿼리가 필요한 경우에만 실행된다.
         return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
-    }
-
-    @Override
-    public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
-        return null;
     }
 
     private BooleanExpression usernameEq(String username) {
