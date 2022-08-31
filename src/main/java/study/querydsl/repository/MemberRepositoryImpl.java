@@ -1,13 +1,20 @@
 package study.querydsl.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
 import study.querydsl.dto.QMemberTeamDto;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.util.StringUtils.hasText;
 import static study.querydsl.entity.QMember.member;
@@ -37,6 +44,62 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         ageLoe(condition.getAgeLoe())
                 )
                 .fetch();
+    }
+
+    @Override
+    public Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable) {
+
+        List<MemberTeamDto> result = queryFactory
+                .select(new QMemberTeamDto(
+                        member.id.as("memberId"),
+                        member.username,
+                        member.age,
+                        team.id.as("teamId"),
+                        team.name.as("teamName")))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe())
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        //카운트 쿼리를 최적화 할 수 있으면 하는게 좋다.
+//        Optional<Long> count = Optional.ofNullable(queryFactory
+//                .select(Wildcard.count)
+//                .from(member)
+//                .leftJoin(member.team, team)
+//                .where(
+//                        usernameEq(condition.getUsername()),
+//                        teamNameEq(condition.getTeamName()),
+//                        ageGoe(condition.getAgeGoe()),
+//                        ageLoe(condition.getAgeLoe())
+//                ).fetchOne());
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(Wildcard.count)
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe())
+                );
+
+
+//        return new PageImpl<>(result, pageable, count.orElse(0L));
+        //아래와 같이 변경하면 카운트 쿼리가 필요한 경우에만 실행된다.
+        return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
+        return null;
     }
 
     private BooleanExpression usernameEq(String username) {
